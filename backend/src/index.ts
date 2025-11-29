@@ -23,7 +23,10 @@ const PORT = process.env.PORT || 5000;
 app.use(express.json());
 app.use(
   cors({
-    origin: "https://gather-mernstac-frontend.onrender.com",
+    origin: [
+      "https://gather-mernstac-frontend.onrender.com",
+      "http://localhost:3000",
+    ],
     credentials: true,
   })
 );
