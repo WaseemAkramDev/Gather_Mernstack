@@ -18,7 +18,7 @@ function Space() {
 
   useEffect(() => {
     if (!token || !peerId) return;
-    socketRef.current = io("http://localhost:5000", {
+    socketRef.current = io(import.meta.env.VITE_BACKEND_URL, {
       query: { token },
     });
     socketRef.current.on("connect", () => {
