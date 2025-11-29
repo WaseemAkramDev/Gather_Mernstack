@@ -7,15 +7,8 @@ export default defineConfig({
   server: {
     port: 3000,
   },
-  plugins: [react(), tailwindcss()],
-  build: {
-    outDir: "dist",
-    emptyOutDir: true,
-    sourcemap: false,
-    rollupOptions: {
-      output: {
-        manualChunks: undefined,
-      },
-    },
+  preview: {
+    port: 3000,
   },
+  plugins: [react(), tailwindcss()],
 });
