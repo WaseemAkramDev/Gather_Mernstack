@@ -7,17 +7,16 @@ import { useSpaceDetails } from "../api/space";
 import SpaceScene from "../phaser/phaser";
 import type { PhaserGameConfig, User } from "../types";
 import toast from "react-hot-toast";
+import { AlertCircle, Sparkles } from "lucide-react";
 
 export default function PhaserWrapper() {
   const gameRef = useRef<Phaser.Game | null>(null);
   const queryClient = useQueryClient();
   const { spaceId } = useParams<{ spaceId: string }>();
 
-  const {
-    data: spaceDetails,
-    isLoading: isSpaceLoading,
-    error: spaceError,
-  } = useSpaceDetails(spaceId!);
+  const { data: spaceDetails, isLoading: isSpaceLoading } = useSpaceDetails(
+    spaceId!
+  );
 
   const user = queryClient.getQueryData<User>(["user"]);
 
@@ -82,62 +81,39 @@ export default function PhaserWrapper() {
     destroyGame,
   ]);
 
+  const handleResize = () => {
+    if (gameRef.current?.scale) {
+      gameRef.current.scale.resize(
+        Math.max(window.innerWidth - 500, 800),
+        Math.max(window.innerHeight, 600)
+      );
+    }
+  };
+
   useEffect(() => {
-    const handleResize = () => {
-      if (gameRef.current?.scale) {
-        gameRef.current.scale.resize(
-          Math.max(window.innerWidth - 500, 800),
-          Math.max(window.innerHeight, 600)
-        );
-      }
-    };
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
   }, []);
 
   useEffect(() => {
+    if (!hasRequiredData) return;
     initializeGame();
     return destroyGame;
-  }, [initializeGame, destroyGame]);
-
-  if (spaceError) {
-    return (
-      <div className="w-full h-screen bg-black flex items-center justify-center">
-        <div className="text-white text-center">
-          <h2 className="text-xl font-semibold mb-2">Failed to load game</h2>
-          <p className="text-gray-400">
-            {spaceError?.message || "An error occurred"}
-          </p>
-          <button
-            onClick={() => window.location.reload()}
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    );
-  }
+  }, [hasRequiredData]);
 
   if (!spaceId) {
     return (
-      <div className="w-full h-screen bg-black flex items-center justify-center">
-        <div className="text-white text-center">
-          <h2 className="text-xl font-semibold mb-2">Invalid Space</h2>
-          <p className="text-gray-400">No space ID provided</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="w-full h-screen bg-black flex items-center justify-center">
-        <div className="text-white text-center">
-          <h2 className="text-xl font-semibold mb-2">
-            Authentication Required
-          </h2>
-          <p className="text-gray-400">Please log in to access this space</p>
+      <div className="w-full h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-900/30 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-gradient-to-br from-red-400/20 to-pink-400/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-red-400/30">
+            <AlertCircle className="w-8 h-8 text-red-400" />
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-2">Invalid Space</h2>
+          <p className="text-slate-400 max-w-md">
+            No space ID provided. Please check the URL and try again.
+          </p>
         </div>
       </div>
     );
@@ -145,10 +121,36 @@ export default function PhaserWrapper() {
 
   if (isLoading) {
     return (
-      <div className="w-full h-screen bg-black flex items-center justify-center">
-        <div className="text-white text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-          <p className="text-gray-400">Loading space...</p>
+      <div className="w-full h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-900/30 flex items-center justify-center">
+        <div className="flex flex-col items-center space-y-6">
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-cyan-400 rounded-full blur-xl opacity-20 animate-pulse"></div>
+            <Sparkles className="w-16 h-16 text-emerald-400 animate-spin relative z-10" />
+          </div>
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-white mb-2">
+              Loading space
+            </h2>
+            <p className="text-slate-400">Initializing your environment...</p>
+          </div>
+          <div className="flex gap-2">
+            {[0, 1, 2].map((i) => (
+              <div
+                key={i}
+                className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce"
+                style={{ animationDelay: `${i * 0.2}s` }}
+              ></div>
+            ))}
+          </div>
+          <div className="w-48 h-1 bg-slate-700/50 rounded-full overflow-hidden mt-4">
+            <div
+              className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full animate-pulse"
+              style={{
+                width: "60%",
+                animation: "shimmer 2s infinite",
+              }}
+            ></div>
+          </div>
         </div>
       </div>
     );
@@ -156,11 +158,23 @@ export default function PhaserWrapper() {
 
   if (!hasRequiredData) {
     return (
-      <div className="w-full h-screen bg-black flex items-center justify-center">
-        <div className="text-white text-center">
-          <h2 className="text-xl font-semibold mb-2">Unable to load space</h2>
-          <p className="text-gray-400">
-            Missing required data: {!spaceDetails && "space details"}{" "}
+      <div className="w-full h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-900/30 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-gradient-to-br from-red-400/20 to-rose-400/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-red-400/30">
+            <AlertCircle className="w-8 h-8 text-red-400" />
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-2">
+            Unable to load space
+          </h2>
+          <p className="text-slate-400 max-w-md">
+            {!spaceDetails
+              ? "Missing space details."
+              : "An error occurred while loading the space."}
+            <br />
+            <span className="text-xs text-slate-500 mt-2 block">
+              Please refresh the page or contact support if the problem
+              persists.
+            </span>
           </p>
         </div>
       </div>

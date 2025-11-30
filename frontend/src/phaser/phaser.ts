@@ -27,6 +27,8 @@ class SpaceScene extends Phaser.Scene {
   private static readonly NAME_DEPTH = 10;
   private gameObjects: Map<string, Phaser.GameObjects.Image> = new Map();
   private staticElements!: Phaser.Physics.Arcade.StaticGroup;
+  private loadingIndicator: Phaser.GameObjects.Container | null = null;
+  private isPlacingElement = false;
 
   constructor(spaceDetails: any, userAvatar: string, user: any, spaceId: any) {
     super("space-scene");
@@ -310,7 +312,11 @@ class SpaceScene extends Phaser.Scene {
       });
       gameElement.on("pointerdown", () => {
         const data = gameElement.getData("elementData");
-        if (this.inDeleteMode) {
+        if (this.inDeleteMode && !this.loadingIndicator) {
+          this.createLoadingIndicator();
+          setTimeout(() => {
+            this.hideLoadingIndicator();
+          }, 1000);
           const deleteEvent = new CustomEvent("ElementDeleted", {
             detail: {
               elementPlacementId: data._id,
@@ -455,7 +461,11 @@ class SpaceScene extends Phaser.Scene {
 
   private setupClickHandler(): void {
     this.input.on("pointerdown", () => {
-      if (this.cursorImage && this.isValidPlacement()) {
+      if (
+        this.cursorImage &&
+        this.isValidPlacement() &&
+        !this.loadingIndicator
+      ) {
         this.dispatchElementPlacedEvent();
       }
     });
@@ -467,6 +477,7 @@ class SpaceScene extends Phaser.Scene {
       this.cursorImage = undefined;
     }
     this.cursorElement = undefined;
+    this.hideLoadingIndicator();
   }
 
   private setCursorImage(imageData: any): void {
@@ -483,6 +494,11 @@ class SpaceScene extends Phaser.Scene {
 
   private dispatchElementPlacedEvent(): void {
     if (!this.cursorImage) return;
+    this.isPlacingElement = true;
+    this.createLoadingIndicator();
+    setTimeout(() => {
+      this.hideLoadingIndicator();
+    }, 1000);
     const placementEvent = new CustomEvent("ElementPlaced", {
       detail: {
         element: this.cursorElement,
@@ -546,10 +562,65 @@ class SpaceScene extends Phaser.Scene {
     if (!this.cursorImage) return;
     const pointer = this.input.activePointer;
     this.cursorImage.setPosition(pointer.worldX, pointer.worldY);
+    if (this.loadingIndicator && this.isPlacingElement) {
+      this.loadingIndicator.setPosition(
+        pointer.worldX + 50,
+        pointer.worldY + 50
+      );
+    }
   }
 
   private getWorldDimensions(): { width: number; height: number } {
     return { width: 1848, height: 1848 };
+  }
+
+  private createLoadingIndicator(): void {
+    const pointer = this.input.activePointer;
+    const bg = this.add.rectangle(0, 0, 60, 60, 0x000000, 0.6);
+    bg.setStrokeStyle(1, 0xffffff, 0.15);
+    bg.setOrigin(0.5);
+    const spinner = this.add.graphics();
+    spinner.lineStyle(3, 0xffffff, 0.9);
+    spinner.beginPath();
+    spinner.arc(0, 0, 14, 0, Math.PI * 1.35, false);
+    spinner.strokePath();
+    const text = this.add
+      .text(0, 20, "...", {
+        fontSize: "10px",
+        color: "#e0e0e0",
+        fontStyle: "lighter",
+      })
+      .setOrigin(0.5);
+    this.loadingIndicator = this.add.container(pointer.worldX, pointer.worldY, [
+      bg,
+      spinner,
+      text,
+    ]);
+    this.loadingIndicator.setDepth(SpaceScene.CURSOR_DEPTH + 1);
+    this.tweens.add({
+      targets: spinner,
+      rotation: Math.PI * 2,
+      duration: 900,
+      repeat: -1,
+      ease: "Linear",
+    });
+  }
+
+  private hideLoadingIndicator(): void {
+    if (this.loadingIndicator) {
+      this.tweens.add({
+        targets: this.loadingIndicator,
+        alpha: 0,
+        duration: 300,
+        onComplete: () => {
+          if (this.loadingIndicator) {
+            this.loadingIndicator.destroy();
+            this.loadingIndicator = null;
+          }
+          this.isPlacingElement = false;
+        },
+      });
+    }
   }
 }
 

@@ -5,6 +5,7 @@ export function useEventHandlers(socketRef: any) {
   const { mutateAsync: functionAddElementToSpace } = useAddElementToSpace();
   const { mutateAsync: functionDeleteElementFromSpace } =
     useDeleteElementFromSpace();
+
   const ElementPlaced = async (e: CustomEvent) => {
     try {
       const { spaceId, x, y, element }: any = e.detail;
@@ -59,6 +60,7 @@ export function useEventHandlers(socketRef: any) {
       toast.error("Element Deletion Failed!");
     }
   };
+
   const PlayerMoved = async (e: CustomEvent) => {
     try {
       const { x, y, spaceId }: any = e.detail;

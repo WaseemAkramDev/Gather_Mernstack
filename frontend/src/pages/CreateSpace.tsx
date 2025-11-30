@@ -1,4 +1,4 @@
-import { ArrowLeft, Sparkles } from "lucide-react";
+import { ArrowLeft, Loader2, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMaps } from "../api/maps";
@@ -6,22 +6,75 @@ import { useCreateSpace } from "../api/space";
 
 function CreateSpacePage() {
   const navigate = useNavigate();
-  const { data: mapData } = useMaps();
+  const { data: mapData, isLoading } = useMaps();
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
   const [spaceName, setSpaceName] = useState("");
+  const [isCreating, setisCreating] = useState(false);
 
-  const { mutate: createSpace } = useCreateSpace();
+  const createSpaceMutation = useCreateSpace();
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!selectedTemplate || !spaceName) return;
-    createSpace({
-      name: spaceName,
-      dimensions: selectedTemplate.dimensions,
-      thumbnail: selectedTemplate.thumbnail,
-      mapId: selectedTemplate._id,
-    });
-    navigate("/app");
+    try {
+      setisCreating(true);
+      await createSpaceMutation.mutateAsync({
+        name: spaceName,
+        dimensions: selectedTemplate.dimensions,
+        thumbnail: selectedTemplate.thumbnail,
+        mapId: selectedTemplate._id,
+      });
+      navigate("/app");
+    } catch (error) {
+      console.error("Failed to create space:", error);
+    } finally {
+      setisCreating(false);
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-900/30 flex items-center justify-center">
+        <div className="flex flex-col items-center space-y-6">
+          <div className="relative w-16 h-16">
+            <Sparkles className="w-16 h-16 text-emerald-400 absolute animate-spin" />
+            <div className="absolute inset-0 bg-emerald-400/20 rounded-full blur-xl animate-pulse"></div>
+          </div>
+          <div className="flex items-center space-x-2">
+            <p className="text-lg font-semibold text-white">Loading spaces</p>
+            <div className="flex space-x-1">
+              <span
+                className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce"
+                style={{ animationDelay: "0s" }}
+              ></span>
+              <span
+                className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce"
+                style={{ animationDelay: "0.2s" }}
+              ></span>
+              <span
+                className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce"
+                style={{ animationDelay: "0.4s" }}
+              ></span>
+            </div>
+          </div>
+          <div className="w-48 h-1 bg-slate-700/50 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full animate-pulse"
+              style={{
+                width: "60%",
+                animation: "shimmer 2s infinite",
+              }}
+            ></div>
+          </div>
+        </div>
+        <style>{`
+          @keyframes shimmer {
+            0%, 100% { width: 30%; opacity: 0.6; }
+            50% { width: 70%; opacity: 1; }
+          }
+        `}</style>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-900/30 px-6 py-10 flex flex-col items-center">
@@ -41,7 +94,6 @@ function CreateSpacePage() {
           <div className="grid grid-cols-2 gap-6 mb-8">
             {mapData?.map((map) => {
               const isDisabled = map.name.toLowerCase() !== "courtyard";
-
               return (
                 <div
                   key={map._id}
@@ -90,12 +142,13 @@ function CreateSpacePage() {
 
           <button
             onClick={handleCreate}
-            disabled={!selectedTemplate || !spaceName}
+            disabled={!selectedTemplate || !spaceName || isCreating}
             className="relative w-full bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed text-white py-3 px-6 rounded-xl font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 flex items-center justify-center overflow-hidden group"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out"></div>
             <Sparkles className="w-5 h-5 mr-2 relative z-10" />
-            <span className="relative z-10">Create Space</span>
+            <span className="relative z-10">Create Space</span>{" "}
+            {isCreating && <Loader2 className="w-4 h-4 animate-spin ml-2" />}
           </button>
         </div>
       </div>

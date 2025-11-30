@@ -11,7 +11,7 @@ const Dashboard = () => {
   const [open, setOpen] = useState(false);
   const user: User | undefined = queryClient.getQueryData<User>(["user"]);
   const userIds = user?.userId ? [user.userId] : [];
-  const { data: userAvatars } = useUserAvatars(userIds);
+  const { data: userAvatars, isLoading } = useUserAvatars(userIds);
   const currentUserHasAvatar = !!userAvatars?.find(
     (avatar: any) => avatar?.userId == user?.userId
   );
@@ -25,7 +25,9 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-[#282d4e]">
-      {(open || !currentUserHasAvatar) && <AvatarPopup setOpen={setOpen} />}
+      {(open || (!currentUserHasAvatar && !isLoading)) && (
+        <AvatarPopup setOpen={setOpen} />
+      )}
       <DashboardNavigation
         setOpen={setOpen}
         selectedTab={selectedTab}

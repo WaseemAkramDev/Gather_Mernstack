@@ -41,13 +41,12 @@ const VideoCallBar = React.forwardRef<HTMLVideoElement, VideoCallBarProps>(
       navigate("/");
     };
 
-    console.log(peerConnections);
     return (
-      <div className="fixed top-0 left-0 right-0 z-50">
+      <div className={`fixed top-0 left-0 z-50 ${!isMinimized && "right-0"}`}>
         <div
           className={`bg-gray-900 shadow-2xl transition-all duration-500 ease-in-out transform ${
             isMinimized
-              ? "-translate-y-full opacity-0"
+              ? "-translate-y-full opacity-0 h-20 w-[420px]"
               : "translate-y-0 opacity-100"
           }`}
         >

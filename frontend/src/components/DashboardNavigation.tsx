@@ -96,13 +96,18 @@ function DashboardNavigation({
               <div className="relative group">
                 <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/30 to-cyan-400/30 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 scale-150"></div>
                 <div className="relative rounded-full border-2 border-transparent bg-gradient-to-br from-emerald-400/20 to-cyan-400/20 p-0.5">
-                  {userAvatar && (
+                  {userAvatar ? (
                     <img
                       src={userAvatar}
                       alt="User Avatar"
                       className="w-10 h-10 rounded-full object-cover pb-2 ring-2 ring-white/50 transition-all duration-300 group-hover:ring-emerald-400/50"
                     />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full ring-2 ring-white/50 transition-all duration-300 group-hover:ring-emerald-400/50 bg-gradient-to-r from-slate-700 via-slate-600 to-slate-700 animate-pulse relative overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"></div>
+                    </div>
                   )}
+
                   <div className="absolute -bottom-0.5 -right-0.5 transform translate-y-[-2px]">
                     <div className="relative">
                       <div className="absolute inset-0 bg-emerald-400 rounded-full blur-sm opacity-60 animate-pulse"></div>

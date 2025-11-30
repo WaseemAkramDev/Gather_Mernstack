@@ -1,4 +1,4 @@
-import { Search, Filter, SortDesc } from "lucide-react";
+import { Search, Filter, SortDesc, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { SpacePageTabs } from "../types";
 import { useSpace } from "../api/space";
@@ -15,7 +15,39 @@ function SpacesCardWrapper({
 }: SpacesCardWrapperProps) {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
-  const { data: spaces } = useSpace();
+  const { data: spaces, isLoading } = useSpace();
+
+  if (isLoading) {
+    return (
+      <div className="px-8 py-8 bg-gradient-to-br from-slate-900/30 to-emerald-900/10 min-h-[calc(100vh-122px)] flex items-center justify-center">
+        <div className="flex flex-col items-center space-y-8">
+          {/* Animated Icon with Glow */}
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-cyan-400 rounded-full blur-xl opacity-20 animate-pulse"></div>
+            <Sparkles className="w-12 h-12 text-emerald-400 animate-spin relative z-10" />
+          </div>
+
+          {/* Loading Text */}
+          <div className="text-center">
+            <h3 className="text-xl font-semibold text-white mb-2">
+              Loading your spaces
+            </h3>
+            <p className="text-slate-400 text-sm">Please wait a moment...</p>
+          </div>
+
+          <div className="flex gap-1">
+            {[0, 1, 2].map((i) => (
+              <div
+                key={i}
+                className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce"
+                style={{ animationDelay: `${i * 0.2}s` }}
+              ></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="px-8 py-8 bg-gradient-to-br from-slate-900/30 to-emerald-900/10 min-h-[calc(100vh-122px)]">

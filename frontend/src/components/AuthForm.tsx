@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { signup, useSignin } from "../api/authenticate";
 import toast from "react-hot-toast";
+import { Loader2 } from "lucide-react";
 
 const AuthForm = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -19,8 +20,10 @@ const AuthForm = () => {
   };
 
   const signinMutation = useSignin();
+  const [isSubmitting, setisSubmitting] = useState(false);
 
   const handleSubmit = async (e: any) => {
+    setisSubmitting(true);
     e.preventDefault();
     if (isSignUp) {
       const res = await signup(formData.username, formData.password);
@@ -29,11 +32,12 @@ const AuthForm = () => {
         toast.success("signup Successfull!");
       }
     } else {
-      signinMutation.mutate({
+      await signinMutation.mutateAsync({
         username: formData.username,
         password: formData.password,
       });
     }
+    setisSubmitting(false);
   };
 
   return (
@@ -107,9 +111,11 @@ const AuthForm = () => {
 
         <button
           type="submit"
-          className="cursor-pointer w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+          disabled={isSubmitting}
+          className="cursor-pointer w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-[0.5] flex items-center justify-center gap-2"
         >
-          {isSignUp ? "Create Account" : "Sign in with email"}
+          {isSignUp ? "Create Account" : "Sign in with email"}{" "}
+          {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
         </button>
       </form>
 
