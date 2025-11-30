@@ -51,7 +51,7 @@ function Space() {
             });
             window.dispatchEvent(event);
           },
-          data.type == "space-joined" ? 10 : 0
+          data.type == "space-joined" ? 100 : 0
         );
       } catch (error) {
         console.error("Error handling message:", error);
