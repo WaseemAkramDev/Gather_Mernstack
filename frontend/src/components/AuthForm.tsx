@@ -24,20 +24,23 @@ const AuthForm = () => {
 
   const handleSubmit = async (e: any) => {
     setisSubmitting(true);
-    e.preventDefault();
-    if (isSignUp) {
-      const res = await signup(formData.username, formData.password);
-      if (res.userId) {
-        setIsSignUp(false);
-        toast.success("signup Successfull!");
+    try {
+      e.preventDefault();
+      if (isSignUp) {
+        const res = await signup(formData.username, formData.password);
+        if (res.userId) {
+          setIsSignUp(false);
+          toast.success("signup Successfull!");
+        }
+      } else {
+        await signinMutation.mutateAsync({
+          username: formData.username,
+          password: formData.password,
+        });
       }
-    } else {
-      await signinMutation.mutateAsync({
-        username: formData.username,
-        password: formData.password,
-      });
+    } catch (e) {
+      setisSubmitting(false);
     }
-    setisSubmitting(false);
   };
 
   return (
