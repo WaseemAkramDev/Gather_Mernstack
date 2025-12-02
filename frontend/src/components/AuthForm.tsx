@@ -30,6 +30,7 @@ const AuthForm = () => {
         const res = await signup(formData.username, formData.password);
         if (res.userId) {
           setIsSignUp(false);
+          setisSubmitting(false);
           toast.success("signup Successfull!");
         }
       } else {
