@@ -1,26 +1,13 @@
 import { useState, useCallback, useMemo } from "react";
-import {
-  Search,
-  Upload,
-  Undo,
-  Type,
-  Grid,
-  Gift,
-  Lamp,
-  Table,
-  Leaf,
-  Gamepad,
-  DollarSign,
-  Loader2,
-  AlertCircle,
-  X,
-} from "lucide-react";
 import { useElements } from "../api/maps";
+import { AlertCircle, Loader2, Search, Trash, X } from "lucide-react";
 
 interface IElement {
   _id: string;
   name: string;
   imageUrl: string;
+  visible: boolean;
+  static: boolean;
 }
 
 const GRID_CONFIG = {
@@ -35,70 +22,17 @@ const CustomizeSidebar = () => {
   const [carriedElement, setCarriedElement] = useState<IElement | null>(null);
 
   const { data: elements, isLoading, error, refetch } = useElements();
-  const menuOptions: any[] = useMemo(
-    () => [
-      {
-        icon: <Undo size={18} />,
-        id: "undo",
-        label: "Delete Mode",
-        action: () => handleDeleteMode(),
-      },
-      {
-        icon: <Upload size={18} />,
-        id: "upload",
-        label: "Upload",
-      },
-      {
-        icon: <Type size={18} />,
-        id: "text",
-        label: "Text",
-      },
-      {
-        icon: <Grid size={18} />,
-        id: "grid",
-        label: "Grid",
-      },
-      {
-        icon: <Gift size={18} />,
-        id: "gift",
-        label: "Decorations",
-      },
-      {
-        icon: <Lamp size={18} />,
-        id: "lamp",
-        label: "Lighting",
-      },
-      {
-        icon: <Table size={18} />,
-        id: "table",
-        label: "Furniture",
-      },
-      {
-        icon: <Leaf size={18} />,
-        id: "plant",
-        label: "Plants",
-      },
-      {
-        icon: <Gamepad size={18} />,
-        id: "game",
-        label: "Games",
-      },
-      {
-        icon: <DollarSign size={18} />,
-        id: "money",
-        label: "Premium",
-      },
-    ],
-    [selectedTool]
-  );
 
   const filteredElements = useMemo(() => {
     if (!elements) return [];
-    if (!searchQuery.trim()) return elements;
     const query = searchQuery.toLowerCase().trim();
-    return elements.filter((element: IElement) =>
-      element.name.toLowerCase().includes(query)
-    );
+    return elements.filter((element: IElement) => {
+      return (
+        element.name.toLowerCase().includes(query) &&
+        element.visible &&
+        !element.static
+      );
+    });
   }, [elements, searchQuery]);
 
   const functionRestoreMouse = () => {
@@ -115,6 +49,7 @@ const CustomizeSidebar = () => {
       window.dispatchEvent(deleteEvent);
       return;
     }
+    setSelectedTool("undo");
     functionRestoreMouse();
     const deleteEvent = new CustomEvent("inDeleteMode");
     window.dispatchEvent(deleteEvent);
@@ -138,16 +73,6 @@ const CustomizeSidebar = () => {
     },
     [carriedElement, selectedTool]
   );
-
-  const handleToolSelect = (option: any) => {
-    setSelectedTool(option.id);
-    if (option.action) {
-      option.action();
-    }
-    if (option.id !== "undo" && carriedElement) {
-      functionRestoreMouse();
-    }
-  };
 
   const handleSearchChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -181,46 +106,6 @@ const CustomizeSidebar = () => {
     [carriedElement, isElementCarried]
   );
 
-  const renderToolButton = (option: any) => (
-    <button
-      key={option.id}
-      onClick={() => handleToolSelect(option)}
-      className={`
-        relative p-3 rounded-xl transition-all duration-300 ease-out group border
-        ${
-          selectedTool === option.id
-            ? "bg-gradient-to-r from-blue-500/20 to-purple-600/20 border-blue-400/70 scale-105 shadow-xl shadow-blue-500/25"
-            : "bg-slate-800/50 border-slate-700/50 hover:bg-slate-700/60 hover:scale-105 hover:shadow-lg hover:border-slate-600/60"
-        }
-        text-white
-      `}
-      title={option.label}
-      aria-label={option.label}
-    >
-      <div className="relative z-10">{option.icon}</div>
-
-      {/* Tooltip */}
-      <div
-        className="absolute left-full ml-3 px-3 py-2 bg-slate-900/95 text-sm rounded-lg 
-                      opacity-0 group-hover:opacity-100 transition-all duration-200 whitespace-nowrap z-20
-                      border border-slate-700/50 shadow-xl backdrop-blur-sm"
-      >
-        {option.label}
-        <div
-          className="absolute right-full top-1/2 -translate-y-1/2 w-0 h-0 
-                        border-r-4 border-r-slate-900/95 border-y-4 border-y-transparent"
-        ></div>
-      </div>
-
-      {selectedTool === option.id && (
-        <div
-          className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500/10 to-purple-600/10 
-                        animate-pulse border border-blue-400/30"
-        ></div>
-      )}
-    </button>
-  );
-
   const renderElementCard = (element: IElement) => (
     <div
       key={element._id}
@@ -248,23 +133,29 @@ const CustomizeSidebar = () => {
             loading="lazy"
           />
           {isElementCarried(element._id) && (
-            <div
-              className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-emerald-400 to-teal-500 
+            <div>
+              <div
+                className="absolute -top-1 right-1 w-4 h-4 bg-gradient-to-r from-emerald-400 to-teal-500 
                             rounded-full border-2 border-white animate-pulse shadow-lg"
-            ></div>
+              ></div>
+            </div>
           )}
         </div>
+        {isElementCarried(element._id) && (
+          <button
+            className="absolute top-1/2 left-1/2 translate-x-[-50%] translate-y-[-50%] text-base text-white hover:text-white 
+                          rounded-md transition-all duration-200 font-medium border border-transparent "
+          >
+            Click to cancel
+          </button>
+        )}
       </div>
-
-      {/* Element Name */}
       <div
         className="text-xs text-slate-200 text-center truncate w-full capitalize font-medium 
                       pointer-events-none transition-colors group-hover:text-white"
       >
         {element.name}
       </div>
-
-      {/* Hover Effect Overlay */}
       <div
         className="absolute inset-0 rounded-xl bg-gradient-to-t from-white/5 to-transparent 
                       opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
@@ -334,20 +225,29 @@ const CustomizeSidebar = () => {
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
-      {/* Tool Sidebar */}
-      <div className="flex flex-col gap-3 p-4 bg-slate-900/70 border-r border-slate-700/50 min-w-[80px]">
-        <div className="flex flex-col gap-2">
-          {menuOptions.map(renderToolButton)}
-        </div>
-      </div>
-
-      {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Search Header */}
         <div className="p-6 border-b border-slate-700/50 flex-shrink-0 bg-slate-800/30">
-          <div className="relative">
+          <div className="relative flex items-center justify-start w-full gap-4">
+            {" "}
+            <div>
+              {selectedTool == "undo" ? (
+                <div
+                  onClick={handleDeleteMode}
+                  className="text-base font-semibold cursor-pointer hover:underline"
+                >
+                  Cancel
+                </div>
+              ) : (
+                <Trash
+                  size={22}
+                  className="group-hover:drop-shadow-lg group-hover:animate-pulse cursor-pointer"
+                  strokeWidth={1.5}
+                  onClick={handleDeleteMode}
+                />
+              )}
+            </div>
             <div
-              className="flex items-center bg-slate-800/70 rounded-xl px-4 py-3 
+              className="w-full flex items-center bg-slate-800/70 rounded-xl px-4 py-3 
                             border border-slate-600/50 transition-all duration-200 
                             focus-within:border-blue-400/70 focus-within:shadow-lg focus-within:shadow-blue-500/20"
             >
@@ -388,7 +288,6 @@ const CustomizeSidebar = () => {
           )}
         </div>
 
-        {/* Carried Element Status */}
         {carriedElement && (
           <div
             className="p-4 bg-slate-800/80 border-t border-slate-700/50 
@@ -403,13 +302,6 @@ const CustomizeSidebar = () => {
                 </span>
               </div>
             </div>
-            <button
-              onClick={() => setCarriedElement(null)}
-              className="ml-auto px-3 py-1 text-xs text-slate-400 hover:text-white 
-                         hover:bg-slate-700/50 rounded-md transition-all duration-200 font-medium border border-transparent hover:border-slate-600/50"
-            >
-              Cancel
-            </button>
           </div>
         )}
       </div>

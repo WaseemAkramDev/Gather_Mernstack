@@ -45,9 +45,7 @@ const VideoCallBar = React.forwardRef<HTMLVideoElement, VideoCallBarProps>(
       <div className={`fixed top-0 left-0 z-50 ${!isMinimized && "right-0"}`}>
         <div
           className={`bg-gray-900 shadow-2xl transition-all duration-500 ease-in-out transform ${
-            isMinimized
-              ? "-translate-y-full opacity-0 h-20 w-[420px]"
-              : "translate-y-0 opacity-100"
+            isMinimized && "hidden"
           }`}
         >
           <div className="p-4 pb-20">

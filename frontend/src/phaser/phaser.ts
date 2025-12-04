@@ -275,6 +275,12 @@ class SpaceScene extends Phaser.Scene {
       case "white board":
         offsetY = 8;
         break;
+      case "purplesofa-back":
+        offsetY = -20;
+        break;
+      case "purplesofa-front":
+        offsetY = -20;
+        break;
       default:
         offsetY = 0;
     }
