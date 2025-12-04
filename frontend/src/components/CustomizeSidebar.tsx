@@ -238,12 +238,17 @@ const CustomizeSidebar = () => {
                   Cancel
                 </div>
               ) : (
-                <Trash
-                  size={22}
-                  className="group-hover:drop-shadow-lg group-hover:animate-pulse cursor-pointer"
-                  strokeWidth={1.5}
+                <div
+                  className="flex flex-col items-center justify-center hover:text-red-500 cursor-pointer"
                   onClick={handleDeleteMode}
-                />
+                >
+                  <Trash
+                    size={22}
+                    className="group-hover:drop-shadow-lg group-hover:animate-pulse"
+                    strokeWidth={1.5}
+                  />
+                  <div className="text-xs font-medium">Delete</div>
+                </div>
               )}
             </div>
             <div

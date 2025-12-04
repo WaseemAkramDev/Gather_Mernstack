@@ -171,6 +171,21 @@ class SpaceScene extends Phaser.Scene {
     }
   }
 
+  private removeUser(userId: string): void {
+    const player = this.userSprites[userId];
+    const container = this.userContainers[userId];
+
+    if (player) {
+      player.destroy();
+      delete this.userSprites[userId];
+    }
+
+    if (container) {
+      container.destroy();
+      delete this.userContainers[userId];
+    }
+  }
+
   private createUserSprite(
     x: number,
     y: number,
@@ -343,6 +358,7 @@ class SpaceScene extends Phaser.Scene {
     this.setupSpaceJoinedListener();
     this.setupUserJoinedListener();
     this.setupUserMovementListener();
+    this.setupUserLeftListener();
   }
 
   private setupPlaceElementListener(): void {
@@ -432,6 +448,14 @@ class SpaceScene extends Phaser.Scene {
       const { payload } = event.detail;
       console.log("user joined payload:", payload);
       this.renderUsers(payload);
+    });
+  }
+
+  private setupUserLeftListener(): void {
+    window.addEventListener("user-left", (event: any) => {
+      const { payload } = event.detail;
+      console.log("user Left payload:", payload);
+      this.removeUser(payload.userId);
     });
   }
 
