@@ -5,6 +5,7 @@ import VideoCallBar from "./VideoCallBar";
 interface VideoCallWrapperProps {
   setPeerId: (id: string) => void;
   remotePeerIds: string[];
+  usernameMap?: any;
 }
 
 interface PeerConnection {
@@ -13,7 +14,11 @@ interface PeerConnection {
   stream: MediaStream | null;
 }
 
-function VideoCallWrapper({ setPeerId, remotePeerIds }: VideoCallWrapperProps) {
+function VideoCallWrapper({
+  setPeerId,
+  remotePeerIds,
+  usernameMap,
+}: VideoCallWrapperProps) {
   const currentUserVideoRef = useRef<HTMLVideoElement>(null);
   const peerInstance = useRef<Peer | null>(null);
   const userMediaStream = useRef<MediaStream | null>(null);
@@ -227,6 +232,7 @@ function VideoCallWrapper({ setPeerId, remotePeerIds }: VideoCallWrapperProps) {
       ref={currentUserVideoRef}
       peerConnections={peerConnections}
       initializeUserMedia={initializeUserMedia}
+      usernameMap={usernameMap}
     />
   );
 }

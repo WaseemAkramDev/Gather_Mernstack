@@ -96,10 +96,12 @@ export class User {
       this.send({
         type: "call_init",
         remotePeerId: user.peerId,
+        username: user.username,
       });
       user.send({
         type: "call_init",
         remotePeerId: this.peerId,
+        username: this.username,
       });
     });
     usersToRemove.forEach((user: any) => {

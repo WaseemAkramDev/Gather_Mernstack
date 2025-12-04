@@ -2,9 +2,10 @@ import { useEffect, useRef } from "react";
 
 interface VideoBoxProps {
   stream?: MediaStream | null;
+  username?: any;
 }
 
-function VideoBox({ stream }: VideoBoxProps) {
+function VideoBox({ stream, username }: VideoBoxProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   useEffect(() => {
     if (videoRef.current && stream) {
@@ -26,9 +27,13 @@ function VideoBox({ stream }: VideoBoxProps) {
         <div className="w-full h-full bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center relative">
           <div className="text-white text-center">
             <div className="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center mb-2 mx-auto">
-              <span className="text-lg font-semibold">U</span>
+              <span className="text-lg font-semibold">
+                {username ? username[0] : "U"}
+              </span>
             </div>
-            <p className="text-sm font-medium">User</p>
+            <p className="text-sm font-medium">
+              {username ? username : "User"}
+            </p>
             {hasAudio && (
               <p className="text-xs text-green-400 mt-1">Audio only</p>
             )}

@@ -10,7 +10,7 @@ import VideoCallWrapper from "../components/VideoCallWrapper";
 function Space() {
   const [peerId, setPeerId] = useState("");
   const [remotePeerIds, setRemotePeerIds] = useState<string[]>([]);
-
+  const [usernameMap, setUsernameMap] = useState<any>({});
   const queryClient = useQueryClient();
   const socketRef = useRef<Socket | null>(null);
   const { spaceId } = useParams<{ spaceId: string }>();
@@ -31,8 +31,12 @@ function Space() {
     socketRef.current.on("message", (data) => {
       console.log(data);
       if (data.type == "call_init") {
-        const { remotePeerId } = data;
+        const { remotePeerId, username } = data;
         console.log("add to remote peer Ids");
+        setUsernameMap((prev: any) => ({
+          ...prev,
+          [`${remotePeerId}`]: username,
+        }));
         addRemotePeerId(remotePeerId);
         return;
       }
@@ -91,10 +95,16 @@ function Space() {
     });
   }, []);
 
+  console.log(usernameMap);
+
   return (
     <div className="grid grid-cols-[1fr_500px] h-screen w-screen overflow-hidden">
       <div className="relative">
-        <VideoCallWrapper setPeerId={setPeerId} remotePeerIds={remotePeerIds} />
+        <VideoCallWrapper
+          setPeerId={setPeerId}
+          remotePeerIds={remotePeerIds}
+          usernameMap={usernameMap}
+        />
         <PhaserWrapper />
       </div>
       <CustomizeSidebar />

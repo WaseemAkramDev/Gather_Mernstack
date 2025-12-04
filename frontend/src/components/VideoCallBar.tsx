@@ -14,10 +14,14 @@ import { useNavigate } from "react-router-dom";
 interface VideoCallBarProps {
   peerConnections: any;
   initializeUserMedia: any;
+  usernameMap: any;
 }
 
 const VideoCallBar = React.forwardRef<HTMLVideoElement, VideoCallBarProps>(
-  ({ peerConnections, initializeUserMedia }, currentUserVideoRef) => {
+  (
+    { peerConnections, initializeUserMedia, usernameMap },
+    currentUserVideoRef
+  ) => {
     const navigate = useNavigate();
     const [isMinimized, setIsMinimized] = useState(true);
     const [isVideoOn, setIsVideoOn] = useState(false);
@@ -109,7 +113,11 @@ const VideoCallBar = React.forwardRef<HTMLVideoElement, VideoCallBarProps>(
                 </div>
               </div>
               {Array.from(peerConnections.values()).map((connection: any) => (
-                <VideoBox key={connection.peerId} stream={connection.stream} />
+                <VideoBox
+                  key={connection.peerId}
+                  stream={connection.stream}
+                  username={usernameMap[connection?.peerId]}
+                />
               ))}
             </div>
           </div>
