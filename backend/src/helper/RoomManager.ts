@@ -22,20 +22,15 @@ export class RoomManager {
       );
       return;
     }
-
     const users = this.rooms.get(spaceId);
     if (!users) return;
-
-    const updatedUsers = users.filter((u) => u.id !== user.id);
-
+    const updatedUsers = users.filter((u) => u.userId !== user.userId);
     if (updatedUsers.length === 0) {
-      // Remove empty room
       this.rooms.delete(spaceId);
       console.log(`Room ${spaceId} deleted (no users left)`);
     } else {
       this.rooms.set(spaceId, updatedUsers);
     }
-
     console.log(`User ${user.id} removed from room ${spaceId}`);
   }
 

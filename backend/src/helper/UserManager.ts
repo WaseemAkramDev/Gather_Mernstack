@@ -144,6 +144,25 @@ export class User {
     }
     this.spaceId = spaceId;
     this.peerId = peerId;
+    if (
+      RoomManager.getInstance()
+        .getUsers(this?.spaceId)
+        ?.find((user) => user?.userId == this?.userId)
+    ) {
+      console.log("Removed extra instance of user from Room");
+      RoomManager.getInstance().broadcast(
+        {
+          type: "user-left",
+          payload: {
+            userId: this.userId,
+          },
+        },
+        this,
+        this.spaceId
+      );
+      RoomManager.getInstance().removeUser(this, spaceId);
+    }
+
     RoomManager.getInstance().addUser(spaceId, this);
     this.x = 550 - Math.random();
     this.y = 750 - Math.random();
@@ -158,7 +177,7 @@ export class User {
         users:
           RoomManager.getInstance()
             .getUsers(spaceId)
-            ?.filter((user) => user.id !== this.id)
+            ?.filter((user) => user.userId !== this.userId)
             ?.map((u) => ({
               id: u.id,
               userId: u.userId,
@@ -170,7 +189,6 @@ export class User {
             })) ?? [],
       },
     });
-
     RoomManager.getInstance().broadcast(
       {
         type: "user-joined",
@@ -190,7 +208,7 @@ export class User {
   }
 
   destroy() {
-    console.log(`User ${this.id} destroying`);
+    console.log(`User ${this.userId} destroying`);
     if (this.spaceId) {
       RoomManager.getInstance().broadcast(
         {
@@ -199,6 +217,14 @@ export class User {
             id: this.id,
             userId: this.userId,
           },
+        },
+        this,
+        this.spaceId
+      );
+      RoomManager.getInstance().broadcast(
+        {
+          type: "removePeerId",
+          remotePeerId: this.peerId,
         },
         this,
         this.spaceId
