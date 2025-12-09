@@ -12,7 +12,7 @@ const PrivateRoute = () => {
     return <Navigate to="/" replace />;
   }
 
-  if (!user) {
+  if (!user && token) {
     try {
       const decoded = jwtDecode<User>(token);
       queryClient.setQueryData(["user"], decoded);
